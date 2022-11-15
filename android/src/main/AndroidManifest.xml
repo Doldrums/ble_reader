@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.example.ble_reader">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.ble_reader">
     <!-- required for API < 30 -->
     <uses-permission
         android:name="android.permission.BLUETOOTH"
@@ -21,7 +22,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
     <!-- add android:usesPermissionFlags="neverForLocation" when you can strongly assert that
          your app never derives physical location from Bluetooth scan results. -->
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation"
-        tools:targetApi="s"/>
+        tools:targetApi="s" />
 </manifest>

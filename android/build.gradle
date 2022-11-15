@@ -46,5 +46,7 @@ android {
 }
 dependencies {
     implementation 'androidx.annotation:annotation:1.5.0'
+    implementation 'androidx.core:core:1.9.0'
+    //noinspection GradlePath
     implementation files('/Users/amoriodi/src/flutter/bin/cache/artifacts/engine/android-x64/flutter.jar')
 }

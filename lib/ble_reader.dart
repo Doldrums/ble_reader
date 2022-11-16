@@ -14,13 +14,11 @@ class BleReader {
 
   Stream<String>? _dataStream;
 
-  /// Event Channel for MTU state
   final EventChannel _dataChangedEventChannel = const EventChannel(
     'ble_reader',
   );
 
-  /// Returns Stream of MTU updates.
-  Stream<String> get onMtuChanged {
+  Stream<String> get onData {
     _dataStream ??= _dataChangedEventChannel
         .receiveBroadcastStream()
         .cast<int>()

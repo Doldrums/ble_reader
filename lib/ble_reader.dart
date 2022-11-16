@@ -2,8 +2,7 @@ import 'package:flutter/services.dart';
 
 class BleReader {
   /// Singleton instance
-  static final BleReader _instance =
-  BleReader._internal();
+  static final BleReader _instance = BleReader._internal();
 
   /// Singleton factory
   factory BleReader() {
@@ -29,5 +28,4 @@ class BleReader {
         .map((dynamic event) => event as String);
     return _dataStream!;
   }
-
 }

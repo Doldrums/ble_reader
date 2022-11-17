@@ -6,7 +6,7 @@ import RxSwift
 
 public class SwiftBleReaderPlugin: NSObject, FlutterPlugin {
 
-  private lazy var flutterBlePeripheralManager: CBPeripheralManager  = CBPeripheralManager(delegate: self, queue: nil)
+  private let peripheralManager = PeripheralManager()
   private let dataReceivedHandler = DataReceivedHandler()
 
   init(stateChangedHandler: StateChangedHandler) {
@@ -21,7 +21,7 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin {
     registrar.addMethodCallDelegate(instance, channel: channel)
 
     // Event channel
-    instance.dataReceivedHandler.register(with: registrar, peripheral: instance.flutterBlePeripheralManager)
+    instance.dataReceivedHandler.register(with: registrar, peripheral: peripheralManager)
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

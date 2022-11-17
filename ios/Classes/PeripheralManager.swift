@@ -7,7 +7,6 @@ public class PeripheralManager: ManagerType {
 
     /// Implementation of CBPeripheralManager
     public let manager: CBPeripheralManager
-
     let delegateWrapper: CBPeripheralManagerDelegateWrapper
 
     /// Lock for checking advertising state

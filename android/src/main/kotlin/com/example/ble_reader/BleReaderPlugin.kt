@@ -2,18 +2,15 @@ package com.example.ble_reader
 
 import android.bluetooth.*
 import android.content.Context
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.NonNull
-import androidx.annotation.RequiresApi
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.util.*
-import java.util.stream.Stream
 
 private const val TAG = "Server"
 val MESSAGE_UUID: UUID = UUID.fromString("7db3e235-3608-41f3-a03c-955fcbd2ea4b")
@@ -27,8 +24,6 @@ class BleReaderPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventCha
 
     private var gattServerCallback: GattServerCallback? = null
 
-    @RequiresApi(Build.VERSION_CODES.N)
-    private var data: Stream<String> = Stream.empty()
     private lateinit var bluetoothManager: BluetoothManager
 
 

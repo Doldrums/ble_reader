@@ -14,7 +14,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final _bleReaderPlugin = BleReader();
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +24,7 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Center(
           child: StreamBuilder(
-            stream: _bleReaderPlugin.onData,
+            stream: BleReader.receivedDataStream.asBroadcastStream(),
             initialData: 'None',
             builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
               return Text('Data received: ${snapshot.data}');

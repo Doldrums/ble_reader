@@ -1,29 +1,25 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 
 class BleReader {
-  /// Singleton instance
-  static final BleReader _instance = BleReader._internal();
+  static const MethodChannel _channel = MethodChannel('ble_reader');
+  static const EventChannel _timerEventChannel = EventChannel('ble_reader_stream');
 
-  /// Singleton factory
-  factory BleReader() {
-    return _instance;
+  static late Stream<String> _onReceivedDataStream;
+
+  static Future<void> get setupConnection async {
+    await _channel.invokeMethod('setup');
   }
 
-  /// Singleton constructor
-  BleReader._internal();
+  static Stream<String> get receivedDataStream {
+    _onReceivedDataStream =
+        _timerEventChannel.receiveBroadcastStream()
+            .cast<int>()
+            .distinct()
+            .map((dynamic event) => event as String);
+    print(_onReceivedDataStream);
 
-  Stream<String>? _dataStream;
-
-  final EventChannel _dataChangedEventChannel = const EventChannel(
-    'ble_reader',
-  );
-
-  Stream<String> get onData {
-    _dataStream ??= _dataChangedEventChannel
-        .receiveBroadcastStream()
-        .cast<int>()
-        .distinct()
-        .map((dynamic event) => event as String);
-    return _dataStream!;
+    return _onReceivedDataStream;
   }
 }

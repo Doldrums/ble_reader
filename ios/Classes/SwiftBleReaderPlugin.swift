@@ -2,7 +2,6 @@ import Flutter
 import UIKit
 import CoreLocation
 import CoreBluetooth
-import RxSwift
 
 public class SwiftBleReaderPlugin: NSObject, FlutterPlugin {
 

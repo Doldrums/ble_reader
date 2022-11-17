@@ -2,32 +2,39 @@ package com.example.ble_reader
 
 import android.bluetooth.*
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import androidx.annotation.NonNull
-import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.Log
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.PluginRegistry.Registrar
 import java.util.*
 
+private var gattServer: BluetoothGattServer? = null
 private const val TAG = "Server"
 val MESSAGE_UUID: UUID = UUID.fromString("7db3e235-3608-41f3-a03c-955fcbd2ea4b")
 val SERVICE_UUID: UUID = UUID.fromString("0000b81d-0000-1000-8000-00805f9b34fb")
-val CONFIRM_UUID: UUID = UUID.fromString("36d4dc5c-814b-4097-a5a6-b93b39085928")
-var gattServer: BluetoothGattServer? = null
 
-class BleReaderPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
-    private lateinit var channel: MethodChannel
+class BleReaderPlugin(private var registrar: Registrar) : MethodCallHandler,
+    EventChannel.StreamHandler {
+    private var mEventSink: EventChannel.EventSink? = null
     private var context: Context? = null
-
+    private lateinit var bluetoothManager: BluetoothManager
     private var gattServerCallback: GattServerCallback? = null
 
-    private lateinit var bluetoothManager: BluetoothManager
+    companion object {
+        @JvmStatic
+        fun registerWith(registrar: Registrar) {
+            val channel = MethodChannel(registrar.messenger(), "ble_reader")
+            channel.setMethodCallHandler(BleReaderPlugin(registrar))
 
+            val eventChannel = EventChannel(registrar.messenger(), "ble_reader_stream")
+            eventChannel.setStreamHandler(BleReaderPlugin(registrar))
+        }
+    }
 
-    fun setupGattServer(context: Context) {
+    private fun setupGattServer(context: Context) {
         gattServerCallback = GattServerCallback()
 
         gattServer = bluetoothManager.openGattServer(
@@ -46,59 +53,24 @@ class BleReaderPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventCha
             BluetoothGattCharacteristic.PERMISSION_WRITE
         )
         service.addCharacteristic(messageCharacteristic)
-        val confirmCharacteristic = BluetoothGattCharacteristic(
-            CONFIRM_UUID,
-            BluetoothGattCharacteristic.PROPERTY_WRITE,
-            BluetoothGattCharacteristic.PERMISSION_WRITE
-        )
-        service.addCharacteristic(confirmCharacteristic)
         return service
     }
 
-    override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ble_reader")
-        channel.setMethodCallHandler(this)
-    }
-
-    override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: MethodChannel.Result) {
-        try {
-            when (call.method) {
-                "init" -> initListener()
-                "dispose" -> disposeListener()
-                else -> Handler(Looper.getMainLooper()).post {
-                    result.notImplemented()
-                }
-            }
-
-        } catch (e: Exception) {
-            e.message?.let {
-                result.error(
-                    it,
-                    e.localizedMessage,
-                    e.stackTrace
-                )
+    override fun onMethodCall(call: MethodCall, result: Result) {
+        when (call.method) {
+            "setup" -> context?.let { setupGattServer(it) }
+            else -> {
+                result.notImplemented()
             }
         }
     }
 
-    private fun disposeListener() {
-        TODO("Not yet implemented")
+    override fun onCancel(arguments: Any?) {
+        mEventSink = null
     }
 
-    private fun initListener() {
-        context?.let { setupGattServer(it) }
-    }
-
-    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        channel.setMethodCallHandler(null)
-    }
-
-    override fun onListen(p0: Any?, p1: EventChannel.EventSink?) {
-        gattServerCallback?.setEventSink(p1)
-    }
-
-    override fun onCancel(p0: Any?) {
-        gattServerCallback?.setEventSink(null)
+    override fun onListen(arguments: Any?, eventSink: EventChannel.EventSink?) {
+        gattServerCallback?.setEventSink(eventSink)
     }
 
     private class GattServerCallback : BluetoothGattServerCallback() {
@@ -112,7 +84,7 @@ class BleReaderPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventCha
             super.onConnectionStateChange(device, status, newState)
             val isSuccess = status == BluetoothGatt.GATT_SUCCESS
             val isConnected = newState == BluetoothProfile.STATE_CONNECTED
-            Log.d(
+            android.util.Log.d(
                 TAG,
                 "onConnectionStateChange: Server $device ${device.name} success: $isSuccess connected: $isConnected"
             )

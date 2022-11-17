@@ -10,7 +10,7 @@ public class DataReceivedHandler: NSObject, FlutterStreamHandler {
                                               binaryMessenger: registrar.messenger())
        eventChannel.setStreamHandler(self)
 
-       peripheral.observeDidReceiveRead = { data in
+       peripheralManager.observeDidReceiveRead = { data in
            if let eventSink = self.eventSink {
                eventSink(FlutterStandardTypedData(bytes: data))
            }

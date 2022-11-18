@@ -11,15 +11,8 @@ private enum Constants {
 public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler,
   CBPeripheralManagerDelegate
 {
-  private let peripheralManager: CBPeripheralManager
-  private let eventSink: FlutterEventSink?
-
-  init() {
-    peripheralManager = CBPeripheralManager(
-      delegate: self, queue: nil,
-      options: [CBPeripheralManagerOptionRestoreIdentifierKey: "ble_reader"])
-    super.init()
-  }
+  private var peripheralManager: CBPeripheralManager
+  private var eventSink: FlutterEventSink?
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let instance = SwiftBleReaderPlugin()
@@ -38,7 +31,10 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "start":
-      self.peripheralManager.start()
+      self.peripheralManager = CBPeripheralManager(
+        delegate: self, queue: nil,
+        options: [CBPeripheralManagerOptionRestoreIdentifierKey: "ble_reader"]
+      )
     case "stop":
       result(FlutterMethodNotImplemented)
     default:
@@ -54,11 +50,11 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
   }
 
   public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-    self.eventSink = null
+    self.eventSink = nil
     return nil
   }
 
-  func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
+  public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
     if self.peripheralManager.state == .poweredOn {
       let mutableService: CBMutableService = CBMutableService(
         type: Constants.serviceUUID, primary: true)
@@ -69,7 +65,7 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
         value: nil,
         permissions: [.writeable]
       )
-      mutableService.characteristic = [messageCharacteristic]
+      mutableService.characteristics = [messageCharacteristic]
 
       self.peripheralManager.add(mutableService)
       self.peripheralManager.startAdvertising([
@@ -79,7 +75,7 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
     }
   }
 
-  func peripheralManager(_ peripheral: CBPeripheralManager, willRestore dict: [String: Any]) {
+  public func peripheralManager(_ peripheral: CBPeripheralManager, willRestore dict: [String: Any]) {
     peripheral.delegate = self
     self.peripheralManager = peripheral
 
@@ -91,20 +87,19 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
     }
   }
 
-  func peripheralManager(
+  public func peripheralManager(
     _ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest
   ) {
     self.peripheralManager.respond(to: request, withResult: .success)
   }
 
-  func peripheralManager(
+  public func peripheralManager(
     _ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]
   ) {
     for request in requests where request.characteristic.uuid == Constants.messageUUID {
       if let value = request.value {
-        let valueBytes: [UInt8] = [UInt8](value)
         if let eventSink = self.eventSink {
-          eventSink(FlutterStandardTypedData(bytes: valueBytes))
+          eventSink(FlutterStandardTypedData(bytes: value))
         }
 
         self.peripheralManager.respond(to: request, withResult: .success)

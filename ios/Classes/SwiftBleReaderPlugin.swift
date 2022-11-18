@@ -44,7 +44,6 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
   public func onListen(withArguments argument: Any?, eventSink: @escaping FlutterEventSink)
     -> FlutterError?
   {
-    print("subscribed")
     self.eventSink = eventSink
     return nil
   }
@@ -98,12 +97,8 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
   public func peripheralManager(
     _ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]
   ) {
-    print("didReceiveWrite")
-
     for request in requests where request.characteristic.uuid == Constants.messageUUID {
       if let value = request.value {
-        print(value)
-
         if let eventSink = self.eventSink {
           eventSink(FlutterStandardTypedData(bytes: value))
         }

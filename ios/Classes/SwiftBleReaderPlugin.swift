@@ -44,6 +44,7 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
   public func onListen(withArguments argument: Any?, eventSink: @escaping FlutterEventSink)
     -> FlutterError?
   {
+    print("subscribed")
     self.eventSink = eventSink
     return nil
   }
@@ -55,12 +56,14 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
 
   public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
     if self.peripheralManager.state == .poweredOn {
+      self.peripheralManager.removeAllServices()
+
       let mutableService: CBMutableService = CBMutableService(
         type: Constants.serviceUUID, primary: true)
 
       let messageCharacteristic = CBMutableCharacteristic(
         type: Constants.messageUUID,
-        properties: [.write],
+        properties: [.write, .writeWithoutResponse],
         value: nil,
         permissions: [.writeable]
       )
@@ -95,8 +98,12 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
   public func peripheralManager(
     _ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]
   ) {
+    print("didReceiveWrite")
+
     for request in requests where request.characteristic.uuid == Constants.messageUUID {
       if let value = request.value {
+        print(value)
+
         if let eventSink = self.eventSink {
           eventSink(FlutterStandardTypedData(bytes: value))
         }

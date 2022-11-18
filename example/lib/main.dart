@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-
 import 'package:ble_reader/ble_reader.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,12 +22,30 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: StreamBuilder(
-            stream: BleReader.receivedDataStream.asBroadcastStream(),
-            initialData: 'None',
-            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-              return Text('Data received: ${snapshot.data}');
-            },
+          child: Column(
+            children: [
+              TextButton(
+                onPressed: () async {
+                  final result = await BleReader.setupConnection;
+                  print('Example app Logs: setupConnection result = $result');
+                },
+                child: Text('setupConnection'),
+
+              ),
+              TextButton(
+                onPressed: () {},
+                child: Text('testService'),
+
+              ),
+              StreamBuilder(
+                stream: BleReader.receivedDataStream,
+                initialData: 'None',
+                builder: (BuildContext context,
+                    AsyncSnapshot<dynamic> snapshot) {
+                  return Text('Data received: ${snapshot.data}');
+                },
+              ),
+            ],
           ),
         ),
       ),

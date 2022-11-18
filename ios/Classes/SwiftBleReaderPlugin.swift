@@ -1,5 +1,4 @@
 import CoreBluetooth
-import CoreLocation
 import Flutter
 import UIKit
 
@@ -11,19 +10,14 @@ private enum Constants {
 public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler,
   CBPeripheralManagerDelegate
 {
-  private var peripheralManager: CBPeripheralManager
-  private var eventSink: FlutterEventSink?
-
-  public override init() {
-    super.init()
-  }
+  private var peripheralManager: CBPeripheralManager = CBPeripheralManager()
+  private var eventSink: FlutterEventSink? = nil
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let instance = SwiftBleReaderPlugin()
 
     let channel = FlutterMethodChannel(
       name: "ble_reader", binaryMessenger: registrar.messenger())
-    channel.setMethodCallHandler(instance)
 
     let eventChannel = FlutterEventChannel(
       name: "ble_reader_stream", binaryMessenger: registrar.messenger())
@@ -34,13 +28,14 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
-    case "start":
+    case "setup":
       self.peripheralManager = CBPeripheralManager(
         delegate: self, queue: nil,
         options: [CBPeripheralManagerOptionRestoreIdentifierKey: "ble_reader"]
       )
-    case "stop":
-      result(FlutterMethodNotImplemented)
+      result(true)
+    case "test":
+      result(true)
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -79,7 +74,7 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
     }
   }
 
-  public func peripheralManager(_ peripheral: CBPeripheralManager, willRestore dict: [String: Any]) {
+  public func peripheralManager(_ peripheral: CBPeripheralManager, willRestoreState dict: [String: Any]) {
     peripheral.delegate = self
     self.peripheralManager = peripheral
 

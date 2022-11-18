@@ -14,6 +14,10 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
   private var peripheralManager: CBPeripheralManager
   private var eventSink: FlutterEventSink?
 
+  public override init() {
+    super.init()
+  }
+
   public static func register(with registrar: FlutterPluginRegistrar) {
     let instance = SwiftBleReaderPlugin()
 

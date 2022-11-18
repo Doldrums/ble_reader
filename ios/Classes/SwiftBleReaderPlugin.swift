@@ -23,11 +23,11 @@ public class SwiftBleReaderPlugin: NSObject, FlutterPlugin, FlutterStreamHandler
 
     let channel = FlutterMethodChannel(
       name: "ble_reader", binaryMessenger: registrar.messenger())
-    channel.setMethodCallHandler(self)
+    channel.setMethodCallHandler(instance)
 
     let eventChannel = FlutterEventChannel(
       name: "ble_reader_stream", binaryMessenger: registrar.messenger())
-    eventChannel.setStreamHandler(self)
+    eventChannel.setStreamHandler(instance)
 
     registrar.addMethodCallDelegate(instance, channel: channel)
   }

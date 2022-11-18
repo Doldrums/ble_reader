@@ -1,7 +1,7 @@
 name: ble_reader
 description: This plugin allows you to enable peripheral mode and stream all data that
   is received via Bluetooth Low Energy network as ervices and characteristics.
-version: 0.0.1
+version: 0.1.0
 homepage: https://github.com/Doldrums/ble_reader
 
 environment:
